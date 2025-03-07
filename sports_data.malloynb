@@ -1,5 +1,39 @@
 >>>malloy
 -- Source code for athletics data
+source: all_school is duckdb.sql("""
+   SELECT * FROM read_parquet('schools-2*.parquet',
+   union_by_name = true
+   )
+""") extend {
+    dimension:
+    survey_year_clean is strptime!date((replace(survey_year,".parquet",'')),'%Y')
+    total_profit is (TOTAL_REVENUE_ALL - TOTAL_EXPENSE_ALL)
+    measure:
+    part_men is sum(PARTIC_MEN)
+    part_women is sum(PARTIC_WOMEN)
+    part_total is (sum(PARTIC_MEN) + sum(PARTIC_WOMEN))
+}
+
+source: all_instLevel is duckdb.sql("""
+   SELECT * FROM read_parquet('inst-*.parquet',
+   union_by_name = true
+   )
+""") extend {
+    dimension:
+    survey_year_clean is strptime!date((replace(survey_year,".parquet",'')),'%Y')
+}
+
+source: school is duckdb.table('./school-2022.parquet') extend {
+    dimension:
+    total_profit is (TOTAL_REVENUE_ALL - TOTAL_EXPENSE_ALL)
+     measure:
+    part_men is sum(PARTIC_MEN)
+    part_women is sum(PARTIC_WOMEN)
+    part_total is (sum(PARTIC_MEN) + sum(PARTIC_WOMEN))
+    --join_one: all_instLevel on unitid = all_instLevel.unitid
+}
+
+
 source: eada is duckdb.sql("""
   SELECT * FROM read_csv('data*.csv',
       union_by_name = true
@@ -24,6 +58,11 @@ _headcoach_num_coed is NUM_HDCOACH_COED:: number
 _grandtotal_rev is GRND_TOTAL_REVENUE::number
 _grandtotal_exp is GRND_TOTAL_EXPENSE::number
 _Revenue_all_bskball is REVENUE_MENALL_Bskball::number
+dimension:
+`Shortened School Name2` is replace(institution_name,'University of', '')
+`Shortened School Name1` is replace(`Shortened School Name2`,'the', '')
+`Shortened School Name` is replace(`Shortened School Name1`,'University', '')
+
 measure:
 _OG_aid is sum(_aid_total) {where: _institution_name = "Oregon State University"}
 `Student Aid Given to Men` is sum(_aid_men)
@@ -40,7 +79,7 @@ How does athletic scholarship funding differ between schools in the WCC and scho
 -- Total Aid for the WCC
 # bar_chart
 run: eada -> {
-   group_by: institution_name
+   group_by: `Shortened School Name`
    aggregate: _aid_total is sum(_aid_total)
    where: institution_name = 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco'
   
@@ -56,15 +95,37 @@ run: eada -> {
 >>>malloy
 -- Overall WCC Revenue and Expenses
 run: eada -> {
+   
    group_by: institution_name
-   aggregate: _grandtotal_rev is sum(_grandtotal_rev)
-   aggregate: _grandtotal_exp is sum(_grandtotal_exp)
-   where: institution_name = 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco' 
+   aggregate:
+   _grandtotal_rev is sum(_grandtotal_rev),
+    _grandtotal_exp is sum(_grandtotal_exp),
+    group_by: total_profit is _grandtotal_rev - _grandtotal_exp
+ 
+   where: institution_name = 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco'
+}
+
+
+-- Profit and Loss of WCC schools, by year, in the order of profit
+run: eada -> {
+  group_by:
+  University is institution_name
+  `Year` is _year
+  aggregate:
+  # currency
+  `Total Revenue` is sum(_grandtotal_rev),
+  # currency
+  `Total Expense` is sum(_grandtotal_exp),
+  group_by:
+  # currency
+  `Profit (Loss)` is _grandtotal_rev - _grandtotal_exp
+  order_by: `Profit (Loss)` desc
+  where: institution_name = 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco'
 }
 >>>markdown
 **Question 2:** How do revenues and expenses compare between men's and women's sports teams at Gonzaga?
 >>>malloy
--- Gonzaga Women's Sport Expenses
+-- Gonzaga Women Sport Expenses (Excluding Basketball)
 # line_chart { size = lg }
 run: eada -> {
   where: _institution_name = "Gonzaga University"
@@ -73,9 +134,6 @@ run: eada -> {
   # y
   # currency
   W_Soccer is sum(EXP_WOMEN_Soccer)
-  # y
-  # currency
-  W_Bskball is sum(EXP_WOMEN_Bskball)
   # y
   # currency
   W_XCountry is sum(EXP_WOMEN_XCountry)
@@ -94,9 +152,10 @@ run: eada -> {
   # y
   # currency
   W_Vollball is sum(EXP_WOMEN_Vollball)
+  order_by: Yearly asc
 }
 
--- Gonzaga Women's Sport Revenue
+-- Gonzaga Women Sport Revenue (Excluding Basketball)
 # line_chart { size = lg }
 run: eada -> {
   where: _institution_name = "Gonzaga University"
@@ -105,9 +164,6 @@ run: eada -> {
   # y
   # currency
   W_Soccer is sum(REV_WOMEN_Soccer)
-  # y
-  # currency
-  W_Bskball is sum(REV_WOMEN_Bskball)
   # y
   # currency
   W_XCountry is sum(REV_WOMEN_XCountry)
@@ -126,9 +182,10 @@ run: eada -> {
   # y
   # currency
   W_Vollball is sum(REV_WOMEN_Vollball)
+  order_by: Yearly asc
 }
 >>>malloy
--- Gonzaga Men's Sport Expenses
+-- Gonzaga Men Sport Expenses (Excluding Basketball)
 # line_chart { size = lg }
 run: eada -> {
   where: _institution_name = "Gonzaga University"
@@ -137,9 +194,6 @@ run: eada -> {
   # y
   # currency
   M_Soccer is sum(EXP_MEN_Soccer)
-  # y
-  # currency
-  M_Bskball is sum(EXP_MEN_Bskball)
   # y
   # currency
   M_XCountry is sum(EXP_MEN_XCountry)
@@ -155,9 +209,13 @@ run: eada -> {
   # y
   # currency
   M_Trckcomb is sum(EXP_MEN_Trckcomb)
+  # y
+  # currency
+  M_Baseball is sum(EXP_MEN_Baseball::number)
+  order_by: Yearly asc
 }
 
--- Gonzaga Men's Sport Revenues
+-- Gonzaga Men Sport Revenues (Excluding Basketball)
 # line_chart { size = lg }
 run: eada -> {
   where: _institution_name = "Gonzaga University"
@@ -166,9 +224,6 @@ run: eada -> {
   # y
   # currency
   M_Soccer is sum(REV_MEN_Soccer)
-  # y
-  # currency
-  M_Bskball is sum(REV_MEN_Bskball)
   # y
   # currency
   M_XCountry is sum(REV_MEN_XCountry)
@@ -184,6 +239,55 @@ run: eada -> {
   # y
   # currency
   M_Trckcomb is sum(REV_MEN_Trckcomb)
+  # y
+  # currency
+  M_Baseball is sum(EXP_MEN_Baseball::number)
+  order_by: Yearly asc
+}
+>>>malloy
+-- Gonzaga Womens Basketball Expenses
+# line_chart { size = lg }
+run: eada -> {
+  where: _institution_name = "Gonzaga University"
+  group_by: Yearly is `year`
+  aggregate:
+  # y
+  # currency
+  W_Bskball is sum(EXP_WOMEN_Bskball)
+  order_by: Yearly asc
+}
+-- Gonzaga Womens Basketball Revenues
+# line_chart { size = lg }
+run: eada -> {
+  where: _institution_name = "Gonzaga University"
+  group_by: Yearly is `year`
+  aggregate:
+  # y
+  # currency
+  W_Bskball is sum(REV_WOMEN_Bskball)
+  order_by: Yearly asc
+}
+-- Gonzaga Mens Basketball Expenses
+# line_chart { size = lg }
+run: eada -> {
+  where: _institution_name = "Gonzaga University"
+  group_by: Yearly is `year`
+  aggregate:
+  # y
+  # currency
+  M_Bskball is sum(EXP_MEN_Bskball)
+  order_by: Yearly asc
+}
+-- Gonzaga Mens Basketball Revenues
+# line_chart { size = lg }
+run: eada -> {
+  where: _institution_name = "Gonzaga University"
+  group_by: Yearly is `year`
+  aggregate:
+  # y
+  # currency
+  M_Bskball is sum(REV_MEN_Bskball)
+  order_by: Yearly asc
 }
 >>>markdown
 **Question 3:** What are Title IX gender ratios for student athletes by school? Which Schools have a skewed distribution?
@@ -200,6 +304,34 @@ having: `Student Aid Given to Men` != 0
 having: `Student Aid Given to Women` != 0
 order_by: `Men Percent of Total Aid` desc
 }
+>>>malloy
+-- Men and Women Percent of Total Aid (WCC)
+run: eada -> {
+group_by: `School` is _institution_name
+aggregate:
+# percent
+`Men Percent of Total Aid`
+# percent
+`Women Percent of Total Aid`
+having: `Student Aid Given to Men` != 0
+having: `Student Aid Given to Women` != 0
+order_by: `Men Percent of Total Aid` desc
+where: institution_name = 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco'
+}
+
+-- Men and Women Percent of Total Aid (Future PAC 12)
+run: eada -> {
+group_by: `School` is _institution_name
+aggregate:
+# percent
+`Men Percent of Total Aid`
+# percent
+`Women Percent of Total Aid`
+having: `Student Aid Given to Men` != 0
+having: `Student Aid Given to Women` != 0
+order_by: `Men Percent of Total Aid` desc
+where: institution_name = 'Oregon State University' | 'Washington State University' | 'Boise State University' | 'California State University-Fresno' | 'Colorado State University' | 'Gonzaga University' | 'San Diego State University' | 'Utah State University'
+}
 >>>markdown
 **Question 4:** Which men's and women's sports generate the most and the least amount of revenue?
 >>>malloy
@@ -207,6 +339,7 @@ order_by: `Men Percent of Total Aid` desc
 # line_chart { size = lg }
 run: eada -> {
 group_by: Yearly is `year`
+
 aggregate:
 # y
 # currency
@@ -233,6 +366,7 @@ M_Trckcomb is sum(REV_MEN_Trckcomb)
 M_ftball is sum(REV_MEN_Football)
 # y
 M_bseball is sum(REV_MEN_Baseball)
+order_by: Yearly asc
 }
 
 -- Women's Sports
@@ -267,85 +401,158 @@ run: eada -> {
  # y
  # currency
  W_sftball is sum(REV_WOMEN_Softball)
+ order_by: Yearly asc
 }
 >>>malloy
--- Accumulated Profit or Loss by Women's Sport in the WCC 
---# line_chart { size = lg }
+-- Men's Sports: (WCC)
+# line_chart { size = lg }
 run: eada -> {
-group_by: institution_name
-where: institution_name= 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco'
-
-
-nest: `By instiituion Sport` is {
-
+group_by: Yearly is `year`
 
 aggregate:
 # y
 # currency
-W_Soccer is sum(REV_WOMEN_Soccer) - sum(EXP_WOMEN_Soccer)
+M_Soccer is sum(REV_MEN_Soccer)
 # y
 # currency
-W_Bskball is sum(REV_WOMEN_Bskball) - sum(EXP_WOMEN_Bskball)
+M_Bskball is sum(REV_MEN_Bskball)
 # y
 # currency
-W_XCountry is sum(REV_WOMEN_XCountry) - sum(EXP_WOMEN_XCountry)
+M_XCountry is sum(REV_MEN_XCountry)
 # y
 # currency
-W_Rowing is sum(REV_WOMEN_Rowing) - sum(EXP_WOMEN_Rowing)
+M_Rowing is sum(REV_MEN_Rowing)
 # y
 # currency
-W_Golf is sum(REV_WOMEN_Golf) - sum(EXP_WOMEN_Golf)
+M_Golf is sum(REV_MEN_Golf)
 # y
 # currency
-W_Tennis is sum(REV_WOMEN_Tennis) - sum(EXP_WOMEN_Tennis)
+M_Tennis is sum(REV_MEN_Tennis)
 # y
 # currency
-W_Trckcomb is sum(REV_WOMEN_Trckcomb) - sum(EXP_WOMEN_Trckcomb)
+M_Trckcomb is sum(REV_MEN_Trckcomb)
 # y
-# currency
-W_Vollball is sum(REV_WOMEN_Vollball) - sum(EXP_WOMEN_Vollball)
+M_ftball is sum(REV_MEN_Football)
 # y
-# currency
-W_sftball is sum(REV_WOMEN_Softball) - sum(EXP_WOMEN_Soccer)
-}
+M_bseball is sum(REV_MEN_Baseball)
+order_by: Yearly asc
+where: institution_name = 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco'
 }
 
--- Accumulated Profit or Loss by Men's Sport in the WCC
---# line_chart { size = lg }
+-- Women's Sports (WCC)
+# line_chart { size = lg }
 run: eada -> {
-group_by: _year
-where: institution_name= 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco'
-
-
-nest: `By instiituion Sport` is {
-   group_by: institution_name
-
+ group_by: Yearly is `year`
+ aggregate:
+ # y
+ # currency
+ W_Soccer is sum(REV_WOMEN_Soccer)
+ # y
+ # currency
+ W_Bskball is sum(REV_WOMEN_Bskball)
+ # y
+ # currency
+ W_XCountry is sum(REV_WOMEN_XCountry)
+ # y
+ # currency
+ W_Rowing is sum(REV_WOMEN_Rowing)
+ # y
+ # currency
+ W_Golf is sum(REV_WOMEN_Golf)
+ # y
+ # currency
+ W_Tennis is sum(REV_WOMEN_Tennis)
+ # y
+ # currency
+ W_Trckcomb is sum(REV_WOMEN_Trckcomb)
+ # y
+ # currency
+ W_Vollball is sum(REV_WOMEN_Vollball)
+ # y
+ # currency
+ W_sftball is sum(REV_WOMEN_Softball)
+ order_by: Yearly asc
+where: institution_name = 'Gonzaga University' | 'Santa Clara University' | 'Loyola Marymount University' | 'University of the Pacific' | 'Pepperdine University' | 'University of Portland' | 'Saint Marys College of California' | 'University of San Diego' | 'University of San Francisco'
+}
+>>>malloy
+-- All Sports: Future PAC-12
+run: all_school -> {
+  where: institution_name = 'Gonzaga University' | 'Boise State University' | 'Colorado State University' | 'Fresno State University' | 'San Diego State University' | 'Utah State University' | 'Washington State University' | 'Oregon State University'
+  group_by: 
+    Sports
+    institution_name
+    REVENUE_MENALL
+    REVENUE_WOMENALL
+  order_by: institution_name asc
+}
+>>>malloy
+-- Men's Sports: (Future PAC-12)
+# line_chart { size = lg }
+run: eada -> {
+group_by: Yearly is `year`
 
 aggregate:
 # y
 # currency
-M_Soccer is sum(REV_MEN_Soccer) - sum(EXP_MEN_Soccer)
+M_Soccer is sum(REV_MEN_Soccer)
 # y
 # currency
-M_Bskball is sum(REV_MEN_Bskball) - sum(EXP_MEN_Bskball)
+M_Bskball is sum(REV_MEN_Bskball)
 # y
 # currency
-M_XCountry is sum(REV_MEN_XCountry) - sum(EXP_MEN_XCountry)
+M_XCountry is sum(REV_MEN_XCountry)
 # y
 # currency
-M_Rowing is sum(REV_MEN_Rowing) - sum(EXP_MEN_Rowing)
+M_Rowing is sum(REV_MEN_Rowing)
 # y
 # currency
-M_Golf is sum(REV_MEN_Golf) - sum(EXP_MEN_Golf)
+M_Golf is sum(REV_MEN_Golf)
 # y
 # currency
-M_Tennis is sum(REV_MEN_Tennis) - sum(EXP_MEN_Tennis)
+M_Tennis is sum(REV_MEN_Tennis)
 # y
 # currency
-M_Trckcomb is sum(REV_MEN_Trckcomb) - sum(EXP_MEN_Trckcomb)
+M_Trckcomb is sum(REV_MEN_Trckcomb)
 # y
-M_ftball is sum(REV_MEN_Football) - sum(EXP_MEN_Football)
+M_ftball is sum(REV_MEN_Football)
 # y
-M_bseball is sum(REV_MEN_Baseball) - sum(EXP_MEN_Baseball)
+M_bseball is sum(REV_MEN_Baseball)
+order_by: Yearly asc
+where: institution_name = 'Oregon State University' | 'Washington State University' | 'Boise State University' | 'California State University-Fresno' | 'Colorado State University' | 'Gonzaga University' | 'San Diego State University' | 'Utah State University'
 }
+
+-- Women's Sports (Future PAC-12)
+# line_chart { size = lg }
+run: eada -> {
+ group_by: Yearly is `year`
+ aggregate:
+ # y
+ # currency
+ W_Soccer is sum(REV_WOMEN_Soccer)
+ # y
+ # currency
+ W_Bskball is sum(REV_WOMEN_Bskball)
+ # y
+ # currency
+ W_XCountry is sum(REV_WOMEN_XCountry)
+ # y
+ # currency
+ W_Rowing is sum(REV_WOMEN_Rowing)
+ # y
+ # currency
+ W_Golf is sum(REV_WOMEN_Golf)
+ # y
+ # currency
+ W_Tennis is sum(REV_WOMEN_Tennis)
+ # y
+ # currency
+ W_Trckcomb is sum(REV_WOMEN_Trckcomb)
+ # y
+ # currency
+ W_Vollball is sum(REV_WOMEN_Vollball)
+ # y
+ # currency
+ W_sftball is sum(REV_WOMEN_Softball)
+ order_by: Yearly asc
+where: institution_name = 'Oregon State University' | 'Washington State University' | 'Boise State University' | 'California State University-Fresno' | 'Colorado State University' | 'Gonzaga University' | 'San Diego State University' | 'Utah State University'
 }
