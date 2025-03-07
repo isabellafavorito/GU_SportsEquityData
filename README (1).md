@@ -8,22 +8,20 @@ This repository contains data obtained by the US Department of Education, as can
 This repository contains 11 .csv dataset files and 1 .malloynb analysis file: 
 - [`sports_data.malloynb`](sports_data.malloynb), performs the analysis of the data provided by the Equity in Athletics Data Analysis. 
 - [`data_2023.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis.
-- [`data_2022.csv`](data_2022.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2021.csv`](data_2021.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2020.csv`](data_2020.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2019.csv`](data_2019.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2018.csv`](data_2018.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2017.csv`](data_2017.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2016.csv`](data_2016.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2015.csv`](data_2015.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2014.csv`](data_2014.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2013.csv`](data_2013.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2022.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2021.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2020.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2019.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2018.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2017.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2016.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2015.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2014.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2013.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
 
 
 ## Description of Project
 This project analyzes data from the Equity in Athletics Disclosure Act (see listing above) website to explore trends in college sports equity, including funding, participation, and resource allocation across different institutions. Using Malloy, we developed a structured approach to answer key analytical questions and provide insights into the world of equity in college athletics. In particular, we focused our analysis on athletic scholarship funding differences between conferences, revenue and expense disparities between men's and women's sports at Gonzaga, Title IX gender ratios for student-athletes, and which sports generate the most and least revenue in the WCC and future Pac-12 conference.
-
-NOTE: St Mary's University of California does not have data past 2013 in this dataset. You will see their numbers staggeringly low.
 
 ## Motivation 
 
@@ -32,29 +30,7 @@ With the new introduction of NIL deals into the collegiate world of athletics, g
 
 ## Summary of Findings
 
-Question 1: How does aid differ between the current WCC teams and future Pac-12 teams?
-
-Interestingly, Gonzaga gives the lowest aid for sports out of every school in both the WCC and future Pac-12. This could be due to a number of reasons, likely aid is prioritized elsewhere considering 98% of undergraduate students receive some kind of aid. Further breaking down the WCC Gonzaga has made over 65 Million more dollars in revenue over the past decade while only having 17 Million more dollars in revenue. This begged the question to look at our profit/loss per year, this can be found in our coding file. The seasons (2013-2023) we have data for are the first ten most profitable with 2020 Zags at the 12th most profitable. 
-
-Question 2: How do revenues and expenses differ between men's and women's teams at Gonzaga?
-
-NOTE: We chose to seperate both men's and women's basketball since they skewed our graphs and results. You can see this graphs in our code after the other sports expenses and revenues.
-
-For our overall women sports revenues and expenses, every sport is a little bit in the loss or broke even almost every year. Also, Women's cross country combined into track and field in 2018. 
-
-For our overall men sports revenues and expenses, they are in a very similar boat, with our men's baseball team being the highest earners and spenders for every year outside of basketball.
-
-For our basketball teams, our women's team lost around half a million dollars last year. On the other hand, our men's team made 7 Million dollars last year.
-
-Question 3: What are Title IX gender ratios for student athletes by school? Which Schools have a skewed distribution?
-
-Looking at our future Pac-12 schools, Gonzaga gives the least aid to their men's team and the most towards their women's teams. However, if you look at the WCC schools, Gonzaga gives the third most to our men's teams at 43.3% of total aid.
-
-Question 4: Which men's and women's sports generate the most and the least amount of revenue?
-
-For men's sports, as expected, Football brings in the most revenue by a very large margin at 7 billion dollars last year. Basketball was the second biggest money maker bringing in 2.6 billion dollars last year, then baseball and the rest of the sports.
-
-For women's sports, Basketball easily brings in the most money at 1.2 billion last year. Soccer, Volleyball, and Softball all are very similar slightly above the 600 million mark.
+(Needs work on this later)...
 
 
 Please see the table below for a sample of screenshots of visualizations that will be shown in the analysis: 
@@ -64,10 +40,10 @@ Please see the table below for a sample of screenshots of visualizations that wi
 | `Total Aid for the future Pac 12` | <img src="Bar_Chart_of_Total_Aid_for_the_future_Pac_12.png" width="50%"> |
 | `WCC Revenue by School` | <img src="WCC_Revenue_by_School.png" width="50%"> |
 | `WCC Expenses by School` | <img src="WCC_Expenses_by_School.png" width="50%"> |
-| `Gonzaga Womens Sports Expenses - no basketball` | <img src="Gonzaga_Womens_Sports_Expenses.png" width="50%"> |
-| `Gonzaga Womens Sports Revenues - no basketball` | <img src="Gonzaga_Womens_Sports_Revenues.png" width="50%"> |
-| `Gonzaga Mens Sports Expenses - no basketball` | <img src="Gonzaga_Mens_Sports_Expenses.png" width="50%"> |
-| `Gonzaga Mens Sports Revenues - no basketball` | <img src="Gonzaga_Mens_Sports_Revenues.png" width="50%"> |
+| `Gonzaga Womens Sports Expenses` | <img src="Gonzaga_Womens_Sports_Expenses.png" width="50%"> |
+| `Gonzaga Womens Sports Revenues` | <img src="Gonzaga_Womens_Sports_Revenues.png" width="50%"> |
+| `Gonzaga Mens Sports Expenses` | <img src="Gonzaga_Mens_Sports_Expenses.png" width="50%"> |
+| `Gonzaga Mens Sports Revenues` | <img src="Gonzaga_Mens_Sports_Revenues.png" width="50%"> |
 | `Men and Women Percent of WCC Aid` | <img src="Men_and_Women_Percent_of_WCC_Aid.png" width="50%"> |
 | `Men and Women Percent of Future Pac 12 Aid` | <img src="Men_and_Women_Percent_of_Future_Pac_12_Aid.png" width="50%"> |
 
