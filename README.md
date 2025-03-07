@@ -5,7 +5,7 @@ This repository contains data obtained by the US Department of Education, as can
 
 ## Code
 
-This repository contains 11 .csv dataset files and 1 .malloynb analysis file: 
+This repository contains 11 .csv dataset files, 5 .parquet files, and 1 .malloynb analysis file: 
 - [`sports_data.malloynb`](sports_data.malloynb), performs the analysis of the data provided by the Equity in Athletics Data Analysis. 
 - [`data_2023.csv`](data_2023.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis.
 - [`data_2022.csv`](data_2022.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
@@ -17,7 +17,13 @@ This repository contains 11 .csv dataset files and 1 .malloynb analysis file:
 - [`data_2016.csv`](data_2016.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
 - [`data_2015.csv`](data_2015.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
 - [`data_2014.csv`](data_2014.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
-- [`data_2013.csv`](data_2013.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis. 
+- [`data_2013.csv`](data_2013.csv), supports the analysis of the data provided by the Equity in Athletics Data Analysis.
+- [`inst-2021-2022.parquet`](inst-2021-2022.parquet), supports the analysis of the data provided by the Equity in Athletics Data Analysis.
+- [`inst-pre2021.parquet`](inst-pre2021.parquet), supports the analysis of the data provided by the Equity in Athletics Data Analysis.
+- [`school-2022.parquet`](school-2022.parquet), supports the analysis of the data provided by the Equity in Athletics Data Analysis.
+- [`schools-2020.parquet`](schools-2020.parquet), supports the analysis of the data provided by the Equity in Athletics Data Analysis.
+- [`schools-2021-2022.parquet`](schools-2021-2022.parquet), supports the analysis of the data provided by the Equity in Athletics Data Analysis.
+
 
 
 ## Description of Project
